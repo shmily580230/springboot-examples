@@ -3,7 +3,8 @@
 <Configuration>
     <Properties>
         <Property name="log.path">./logs</Property>
-        <Property name="log.pattern">[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%level] [%t] [%logger{36}:%L] %msg%n%ex</Property>
+        <Property name="log.pattern">[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%level] [%X{traceId}] [%t] [%logger{36}] %msg%n%ex
+        </Property>
         <Property name="app.name">${sys:spring.application.name:-springboot-log4j2}</Property>
     </Properties>
 
@@ -53,7 +54,6 @@
 
     <Loggers>
         <AsyncLogger name="com.examples" level="DEBUG"/>
-
         <AsyncRoot level="INFO">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
