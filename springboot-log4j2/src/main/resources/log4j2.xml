@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration>
+    <Properties>
+        <Property name="log.path">./logs</Property>
+        <Property name="log.pattern">[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%level] [%t] [%logger{36}:%L] %msg%n%ex</Property>
+        <Property name="app.name">${sys:spring.application.name:-springboot-log4j2}</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 控制台输出 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${log.pattern}"/>
+        </Console>
+
+        <!-- 文件输出 -->
+        <RollingFile name="File" fileName="${log.path}/${app.name}.log"
+                     filePattern="${log.path}/${app.name}-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${log.pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="500MB"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${log.path}" maxDepth="1">
+                    <IfFileName glob="${app.name}-*.log">
+                        <IfLastModified age="7d"/>
+                        <IfAccumulatedFileSize exceeds="50GB"/>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- 错误日志文件输出 -->
+        <RollingFile name="ErrorFile" fileName="${log.path}/${app.name}-error.log"
+                     filePattern="${log.path}/${app.name}-error-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${log.pattern}"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="500MB"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${log.path}" maxDepth="1">
+                    <IfFileName glob="${app.name}-error-*.log">
+                        <IfLastModified age="7d"/>
+                        <IfAccumulatedFileSize exceeds="50GB"/>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <AsyncLogger name="com.examples" level="DEBUG"/>
+
+        <AsyncRoot level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="ErrorFile"/>
+        </AsyncRoot>
+    </Loggers>
+</Configuration>
