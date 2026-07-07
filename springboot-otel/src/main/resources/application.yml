@@ -1,0 +1,23 @@
+server:
+  port: 8081 # 避免与 springboot-log4j2（8080）冲突
+
+spring:
+  application:
+    name: springboot-otel
+
+otel:
+  # OTel resource: service.name
+  service:
+    name: springboot-otel
+  # OTLP gRPC 上报
+  exporter:
+    otlp:
+      # tls.insecure: true => 用 http:// 明文；目标是 OpenObserve 的 gRPC 端口 5081
+      endpoint: http://localhost:5081
+      protocol: grpc
+      headers:
+        Authorization: "Basic YWRtaW5AYWRtaW4uY29tOkFkbWluITEyMw==" # admin@admin.com:Admin!123（与 docker-compose 一致）
+        organization: default
+        stream-name: default
+  # 指标上报间隔（默认较长，缩短到 5s 便于快速验证）
+  metric.export.interval: 5000
