@@ -1,0 +1,14 @@
+server:
+  port: 8082 # 避免与 springboot-log4j2（8080）、springboot-otel（8081）冲突
+
+spring:
+  application:
+    name: springboot-nats
+
+nats:
+  spring:
+    # 必填：nats-spring 的 Connection bean 在 server 为空时会返回 null
+    server: "nats://localhost:4222"
+    connection-name: springboot-nats
+    # 断线无限重连（首次连接失败仍会直接抛异常使启动失败，详见 README）
+    max-reconnect: -1

@@ -11,3 +11,4 @@ pluginManagement {
 rootProject.name = "springboot-examples"
 
 include("springboot-otel")
+include("springboot-nats")
