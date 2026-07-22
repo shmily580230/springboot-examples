@@ -9,3 +9,6 @@ build/
 # build output / logs
 logs/
 target/
+out/
+
+docs

@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: springboot-dubbo3-provider
+  main:
+    # 纯 Dubbo 提供者：REST 由 Triple 自带 Netty HTTP 服务在 50052 提供，不经过 Spring MVC/Tomcat，
+    # 因此关掉 web 上下文，避免 starter-web 顺手起一个用不到的 Tomcat。
+    web-application-type: none
+
+dubbo:
+  application:
+    name: springboot-dubbo3-provider
+  protocol:
+    name: tri   # Triple 协议：同时承载原生 RPC 与 REST（HTTP/JSON）
+    port: 50052 # Triple 监听端口；REST 也由此端口对外提供
+  registry:
+    # Nacos 主端口 8848；gRPC 端口 9848 由 SDK 自动推导（=8848+1000），不要把 9848 写进地址。
+    address: nacos://127.0.0.1:8848
+    register-mode: instance                  # 应用级服务发现（Dubbo3 推荐）
+    parameters.register-consumer-url: true
