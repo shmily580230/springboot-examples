@@ -1,0 +1,24 @@
+server:
+  port: 8092 # provider 在 8091；避开现有 8081/8083/50052
+
+spring:
+  application:
+    name: sca-consumer
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+
+# OpenFeign 生产级调优。
+# ⚠️ SC OpenFeign 3.1.x（= 2021.0.x）的命名空间是 feign.*，不是 spring.cloud.openfeign.*
+#   （后者是 4.0/2022.0 才改的）。验证：jar 里 FeignClientProperties = @ConfigurationProperties("feign.client")，
+#   OkHttp 走 feign.okhttp.enabled。写错前缀会被静默忽略。
+feign:
+  okhttp:
+    enabled: true # 用 OkHttp 连接池替换默认 JDK HttpURLConnection → 连接复用、稳态更快
+  client:
+    config:
+      default:
+        connect-timeout: 2000 # 连接超时 2s
+        read-timeout: 5000 # 读超时 5s
+        logger-level: basic # 每次调用打印：方法/URI/状态码/耗时（DEBUG 输出，logger 在 logback-spring.xml 里调到 DEBUG）

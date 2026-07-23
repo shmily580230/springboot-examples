@@ -13,12 +13,12 @@ rootProject.name = "springboot-examples"
 include("springboot-otel")
 include("springboot-nats")
 
-// Dubbo 3 Triple + REST：api（共享接口/模型）+ provider（服务①）+ consumer（服务②）
-// 三模块统一收纳在 springboot-dubbo3/ 下；用 projectDir 重定向保持模块名不变，
-// 这样依赖 project(":springboot-dubbo3-api") 与 :springboot-dubbo3-*:bootRun 写法都不受影响。
-include("springboot-dubbo3-api")
-include("springboot-dubbo3-provider")
-include("springboot-dubbo3-consumer")
-project(":springboot-dubbo3-api").projectDir = file("springboot-dubbo3/springboot-dubbo3-api")
-project(":springboot-dubbo3-provider").projectDir = file("springboot-dubbo3/springboot-dubbo3-provider")
-project(":springboot-dubbo3-consumer").projectDir = file("springboot-dubbo3/springboot-dubbo3-consumer")
+// Spring Cloud Alibaba（OpenFeign + Nacos + OTel）：api（共享接口/模型）+ provider（服务①）+ consumer（服务②）
+// 三模块统一收纳在 springboot-sca/ 下；用 projectDir 重定向保持模块名不变，
+// 这样依赖 project(":springboot-sca-api") 写法不受影响。SCA 2021.0.x ↔ Spring Cloud 2021.0.x ↔ SB 2.6/2.7（JDK8）。
+include("springboot-sca-api")
+include("springboot-sca-provider")
+include("springboot-sca-consumer")
+project(":springboot-sca-api").projectDir = file("springboot-sca/springboot-sca-api")
+project(":springboot-sca-provider").projectDir = file("springboot-sca/springboot-sca-provider")
+project(":springboot-sca-consumer").projectDir = file("springboot-sca/springboot-sca-consumer")

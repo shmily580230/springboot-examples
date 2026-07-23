@@ -1,0 +1,31 @@
+<configuration>
+    <property name="APP_NAME" value="springboot-sca-consumer"/>
+    <property name="LOG_DIR" value="logs"/>
+    <!-- trace_id/span_id 由 OTel Java Agent 注入 MDC：日志天然带上链路上下文 -->
+    <property name="LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [trace=%X{trace_id:-},span=%X{span_id:-}] %logger{36} - %msg%n"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/${APP_NAME}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>500MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+    </appender>
+
+    <!-- Feign BASIC 日志（feign.client.config.default.logger-level: basic）按 DEBUG 输出：
+         必须把客户端接口的 logger 显式调到 DEBUG（Feign 的 Slf4jLogger 以 @FeignClient 接口的全限定名为 category）。
+         自定义 logback-spring.xml 下，application.yml 的 logging.level 不一定生效，故在此显式声明。 -->
+    <logger name="com.examples.sca.consumer.UserFeignClient" level="DEBUG"/>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>
