@@ -43,9 +43,9 @@ subprojects {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OpenTelemetry（Java Agent 方式）：给两个 Dubbo 服务接 OTel。
+// OpenTelemetry（Java Agent 方式）：给两个 SCA 服务（provider/consumer）接 OTel。
 // 用 OTel Java Agent（-javaagent）零代码埋点：自动覆盖 consumer 的 Spring MVC（HTTP 入口）
-// → Dubbo client span → Triple RPC → provider 的 Dubbo server span，靠 W3C traceparent
+// → Feign client span → HTTP → provider 的 Spring MVC server span，靠 W3C traceparent
 // 串成一条跨进程链路，OTLP gRPC 上报到本地 OpenObserve（:5081）。
 //
 // agent jar 入库仓库根（sca 服务共用一份）；downloadOtelAgent 仅作兜底：jar 缺失时才下载。
@@ -85,7 +85,7 @@ listOf(
             "-Dotel.exporter.otlp.headers=Authorization=Basic YWRtaW5AYWRtaW4uY29tOkFkbWluITEyMw==,organization=default,stream-name=default",
             "-Dotel.traces.sampler=parentbased_always_on",                           // 演示用：100% 采样，保证每次 curl 都能看到链路
             "-Dotel.metrics.exporter=none",                                          // 不要 metrics
-            "-Dotel.logs.exporter=none"                                              // 不要 logs（否则 agent 默认把 Nacos/Dubbo 内部日志也上报，淹没真正想看的 trace span）
+            "-Dotel.logs.exporter=none"                                              // 不要 logs（否则 agent 默认把 Nacos/Spring 内部日志也上报，淹没真正想看的 trace span）
         )
     }
 }
