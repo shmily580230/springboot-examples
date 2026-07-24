@@ -12,6 +12,7 @@ rootProject.name = "springboot-examples"
 
 include("springboot-otel")
 include("springboot-nats")
+include("springboot-feign-reactor")
 
 // Spring Cloud Alibaba（OpenFeign + Nacos + OTel）：api（共享接口/模型）+ provider（服务①）+ consumer（服务②）
 // 三模块统一收纳在 springboot-sca/ 下；用 projectDir 重定向保持模块名不变，

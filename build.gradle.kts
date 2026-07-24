@@ -73,7 +73,7 @@ tasks.register("downloadOtelAgent") {
 // 显式 project(modulePath) 而非 configure(list){...}：Kotlin DSL 下 configure 的 lambda 无隐式 receiver，
 // 直接取各项目更可靠，且 tasks.named 是惰性的，spring-boot 插件迟早会注册 bootRun。
 listOf(
-    ":springboot-sca-provider", ":springboot-sca-consumer"
+    ":springboot-sca-provider", ":springboot-sca-consumer", ":springboot-feign-reactor"
 ).forEach { modulePath ->
     project(modulePath).tasks.named<BootRun>("bootRun") {
         dependsOn(rootProject.tasks.named("downloadOtelAgent"))
