@@ -4,6 +4,3 @@ server:
 spring:
   application:
     name: springboot-feign-reactor
-
-# feign-reactor 请求日志通过 FeignLoggingInterceptor 输出。
-# 见 logback-spring.xml 中 FeignLoggingInterceptor 的日志级别配置。

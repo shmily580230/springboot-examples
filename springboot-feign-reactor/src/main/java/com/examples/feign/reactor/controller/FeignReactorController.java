@@ -6,13 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 /**
- * 透传控制器：HTTP 请求 → {@link JsonPlaceholderClient}（WebClient）→ 返回 {@link Mono}/{@link Flux}。
- * <p>
- * Spring MVC 2.7 原生支持响应式返回值（{@link Mono}/{@link Flux}），无需引入 spring-webflux。
+ * 透传控制器：HTTP 请求 → {@link JsonPlaceholderClient}（WebClient）→ 返回 {@link List}/{@link Post}。
  */
 @RestController
 @RequiredArgsConstructor
@@ -24,15 +22,15 @@ public class FeignReactorController {
      * <pre>curl http://localhost:8083/posts</pre>
      */
     @GetMapping("/posts")
-    public Flux<Post> getPosts() {
-        return client.getPosts();
+    public List<Post> getPosts() {
+        return client.getPosts().collectList().block();
     }
 
     /**
      * <pre>curl http://localhost:8083/posts/1</pre>
      */
     @GetMapping("/posts/{id}")
-    public Mono<Post> getPost(@PathVariable Long id) {
-        return client.getPost(id);
+    public Post getPost(@PathVariable Long id) {
+        return client.getPost(id).block();
     }
 }

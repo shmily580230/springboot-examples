@@ -5,7 +5,9 @@
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%X{trace_id:-}] [%X{span_id:-}] %logger{36} - %msg%n"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
     </appender>
 
     <appender name="FILE-ALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -16,7 +18,9 @@
             <maxHistory>7</maxHistory>
             <totalSizeCap>45GB</totalSizeCap>
         </rollingPolicy>
-        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
     </appender>
 
     <appender name="FILE-ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -30,11 +34,10 @@
             <maxHistory>7</maxHistory>
             <totalSizeCap>5GB</totalSizeCap>
         </rollingPolicy>
-        <encoder><pattern>${LOG_PATTERN}</pattern></encoder>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
     </appender>
-
-    <!-- feign-reactor 请求拦截器日志 -->
-    <logger name="com.examples.feign.reactor.config.FeignLoggingInterceptor" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
