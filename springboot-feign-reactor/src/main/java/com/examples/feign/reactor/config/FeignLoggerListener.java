@@ -1,24 +1,27 @@
 package com.examples.feign.reactor.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.json.JSONUtil;
+import feign.MethodMetadata;
+import feign.Target;
 import lombok.extern.slf4j.Slf4j;
 import reactivefeign.client.ReactiveHttpRequest;
 import reactivefeign.client.ReactiveHttpResponse;
 import reactivefeign.client.log.ReactiveLoggerListener;
-import feign.MethodMetadata;
-import feign.Target;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * 自定义 feign-reactor 日志监听器：输出请求信息、响应状态、body 及耗时。
  */
 @Slf4j
-public class FeignLoggerListener implements ReactiveLoggerListener<FeignLoggerListener.Context> {
+public class FeignLoggerListener implements ReactiveLoggerListener<Long> {
 
     @Override
-    public Context requestStarted(ReactiveHttpRequest request, Target<?> target, MethodMetadata metadata) {
+    public Long requestStarted(ReactiveHttpRequest request, Target<?> target, MethodMetadata metadata) {
         log.info("Feign request: {} {}, headers={}",
                 request.method(), request.uri(), request.headers());
-        return new Context();
+        return System.currentTimeMillis();
     }
 
     @Override
@@ -27,23 +30,21 @@ public class FeignLoggerListener implements ReactiveLoggerListener<FeignLoggerLi
     }
 
     @Override
-    public void bodySent(Object body, Context context) {
-        String json = toJson(body);
+    public void bodySent(Object body, Long startTime) {
+        String json = JSONUtil.toJsonStr(Convert.toStr(body));
         log.info("Feign request body, length={}, body={}", json.length(), json);
     }
 
     @Override
-    public void responseReceived(ReactiveHttpResponse<?> response, Context context) {
-        long elapsed = System.currentTimeMillis() - context.startTime;
-        log.info("Feign response: {} {} -> elapsed={}ms, status={}",
-                response.request().method(), response.request().uri(), elapsed, response.status());
+    public void responseReceived(ReactiveHttpResponse<?> response, Long startTime) {
+        long elapsed = System.currentTimeMillis() - startTime;
+        log.info("Feign response: elapsed={}ms, status={}", elapsed, response.status());
     }
 
     @Override
-    public void errorReceived(Throwable error, Context context) {
-        long elapsed = System.currentTimeMillis() - context.startTime;
-        log.error("Feign error: {} {} -> elapsed={}ms, error={}",
-                error.getMessage(), elapsed, error);
+    public void errorReceived(Throwable error, Long startTime) {
+        long elapsed = System.currentTimeMillis() - startTime;
+        log.error("Feign error: elapsed={}ms, error={}", elapsed, error.getMessage());
     }
 
     @Override
@@ -52,22 +53,18 @@ public class FeignLoggerListener implements ReactiveLoggerListener<FeignLoggerLi
     }
 
     @Override
-    public void bodyReceived(Object body, Context context) {
-        String json = toJson(body);
-        log.info("Feign response body, length={}, body={}", json.length(), json);
-    }
-
-    static class Context {
-        final long startTime = System.currentTimeMillis();
-    }
-
-    private static String toJson(Object obj) {
-        try {
-            return MAPPER.writeValueAsString(obj);
-        } catch (Exception e) {
-            return String.valueOf(obj);
+    public void bodyReceived(Object body, Long startTime) {
+        // 响应体可能是 byte[]、String 或已解码对象（Map/POJO）：
+        // byte[]/String 直接按文本输出，避免被当作数字数组序列化；
+        // 对象按 JSON 格式化输出，避免打印成 {k=v} 的 toString 形式
+        String text;
+        if (body instanceof byte[]) {
+            text = new String((byte[]) body, StandardCharsets.UTF_8);
+        } else if (body instanceof String) {
+            text = (String) body;
+        } else {
+            text = JSONUtil.toJsonStr(body);
         }
+        log.info("Feign response body, length={}, body={}", text.length(), text);
     }
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 }

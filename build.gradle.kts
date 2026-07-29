@@ -1,5 +1,3 @@
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.tasks.compile.JavaCompile
 import org.springframework.boot.gradle.tasks.run.BootRun
 
 // 根项目：统一版本 + 所有子模块通用的依赖与打包配置。
@@ -39,6 +37,7 @@ subprojects {
         add("implementation", "org.springframework.boot:spring-boot-starter-web")
         add("compileOnly", "org.projectlombok:lombok")
         add("annotationProcessor", "org.projectlombok:lombok")
+        add("implementation", "cn.hutool:hutool-all:5.8.27")
     }
 }
 
@@ -59,7 +58,8 @@ tasks.register("downloadOtelAgent") {
     outputs.file(otelAgentJar) // jar 已存在则 up-to-date，自动跳过 doLast
     doLast {
         if (!otelAgentJar.exists()) {
-            val url = "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$otelAgentVersion/opentelemetry-javaagent.jar"
+            val url =
+                "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$otelAgentVersion/opentelemetry-javaagent.jar"
             logger.lifecycle("Downloading OpenTelemetry Java Agent v$otelAgentVersion -> ${otelAgentJar.path}")
             otelAgentJar.parentFile.mkdirs()
             java.net.URL(url).openStream().use { input ->

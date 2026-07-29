@@ -54,7 +54,19 @@ curl http://localhost:8083/posts/1
   ```
   logback 的 `LOG_PATTERN` 已包含 `[%X{trace_id:-}] [%X{span_id:-}]` —— 接入 OTel Agent 后日志自动携带链路信息。
 
-- **超时**：默认 `connectTimeoutMillis=5s`、`readTimeoutMillis=10s`、`writeTimeoutMillis=10s`。可按客户端（`name`）单独覆盖：
+- **超时**：`WebReactiveFeign$Builder` 构造时无条件套用 `WebReactiveOptions.DEFAULT_OPTIONS`，即使不写任何配置也会生效，默认值为：
+
+  | 配置项 | 默认 | 作用层（reactor-netty） |
+  |---|---|---|
+  | `connect-timeout-millis` | `5000`（5s） | `ChannelOption.CONNECT_TIMEOUT_MILLIS`，TCP 连接建立超时 |
+  | `read-timeout-millis` | `10000`（10s） | `ReadTimeoutHandler`，**单次**读空闲超时（两次读之间） |
+  | `write-timeout-millis` | `10000`（10s） | `WriteTimeoutHandler`，**单次**写超时 |
+  | `response-timeout-millis` | **未启用**（`null`） | `HttpClient.responseTimeout`，整个请求-响应超时；默认不设，需要时手动开启 |
+
+  > 注意：read/write 是 per-read/per-write 的 handler 级超时，不是"整个响应耗时上限"。要限制一次调用的总时长，用 `response-timeout-millis`。
+
+  **覆盖时的坑**：`reactive.feign.client.config.<name>.options` 是**整体替换**而非合并——`ReactiveFeignBasicConfigurator` 会调 `optionsBuilder.build()` 生成一个全新 `WebReactiveOptions`，yaml 里没写的字段在 builder 中为 `null`，**不会回退到 `DEFAULT_OPTIONS` 的 5s/10s/10s**。所以要么四项都写全，要么只补想改的、其余接受退化为不启用：
+
   ```yaml
   reactive:
     feign:
@@ -62,7 +74,8 @@ curl http://localhost:8083/posts/1
         config:
           jsonplaceholder:
             options:
-              connect-timeout-millis: 3000
-              read-timeout-millis: 5000
-              response-timeout-millis: 8000
+              connect-timeout-millis: 3000   # 改为 3s
+              read-timeout-millis: 5000      # 改为 5s
+              write-timeout-millis: 10000    # 想保留默认就得显式写
+              response-timeout-millis: 8000  # 默认 null，这里开启整体 8s 超时
   ```
