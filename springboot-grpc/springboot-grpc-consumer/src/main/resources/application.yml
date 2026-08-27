@@ -1,0 +1,24 @@
+server:
+  port: 8093 # 避开现有：8081(otel)、8083(feign-reactor)、8091/8092(sca)、8094(grpc-provider)
+
+spring:
+  application:
+    name: grpc-consumer
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 # 从 Nacos 发现 grpc-provider 实例（consumer 自身也注册，便于观测）
+
+grpc:
+  client:
+    # client name = @GrpcClient("grpc-provider")；一个 name 一个 Channel
+    grpc-provider:
+      # discovery:/// + service name：devh 的 DiscoveryClientNameResolver 经 Nacos 拿实例列表，
+      # 每个实例的 gRPC 端口取注册 metadata 的 gRPC.port（见 provider 的 application.yml）
+      address: discovery:///grpc-provider
+      # grpc-java 自带的 LB 策略（默认 pick_first 只连一个实例，多实例轮询要显式开 round_robin）
+      default-load-balancing-policy: round_robin
+      negotiation-type: plaintext # 内网明文（默认 TLS 要证书）；devh 2.x 的 key 是 negotiationType
+      enable-keep-alive: true # 生产常用：TCP 保活 + 空闲驱逐，长连接不被中间设备悄悄掐掉
+      keep-alive-time: 30s
+      keep-alive-without-calls: false

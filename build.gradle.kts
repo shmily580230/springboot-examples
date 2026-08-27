@@ -69,11 +69,12 @@ tasks.register("downloadOtelAgent") {
     }
 }
 
-// 给 sca 的 provider / consumer 的 bootRun 挂载 agent + OTLP 上报（traces-only；metrics/logs 见 README 可选开关）。
+// 给 sca / grpc 的 provider、consumer 及 feign-reactor 的 bootRun 挂载 agent + OTLP 上报（traces-only；metrics/logs 见 README 可选开关）。
 // 显式 project(modulePath) 而非 configure(list){...}：Kotlin DSL 下 configure 的 lambda 无隐式 receiver，
 // 直接取各项目更可靠，且 tasks.named 是惰性的，spring-boot 插件迟早会注册 bootRun。
 listOf(
-    ":springboot-sca-provider", ":springboot-sca-consumer", ":springboot-feign-reactor"
+    ":springboot-sca-provider", ":springboot-sca-consumer", ":springboot-feign-reactor",
+    ":springboot-grpc-provider", ":springboot-grpc-consumer"
 ).forEach { modulePath ->
     project(modulePath).tasks.named<BootRun>("bootRun") {
         dependsOn(rootProject.tasks.named("downloadOtelAgent"))

@@ -1,0 +1,36 @@
+// 用户服务契约（gRPC IDL）。对应 sca 模块的 UserApi 接口：GetUser ↔ GET /users/{id}，CreateUser ↔ POST /users。
+// .proto 是唯一契约源：Gradle protobuf 插件据此生成 message（protobuf）+ stub（grpc-java），
+// provider / consumer 共用生成的类，天然没有「两份契约漂移」的问题。
+syntax = "proto3";
+
+package user; // gRPC 全方法名前缀：user.UserService/GetUser（OTel span 名即此）
+
+option java_package = "com.examples.grpc.api.proto"; // 生成代码的 java 包（api 模块内）
+option java_multiple_files = true; // 每个 message 独立一个 .java（而非嵌套在 UserProto 里），业务侧引用更自然
+
+// 用户模型（对应 sca-api 的 User）。
+message User {
+  int64 id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+// GetUser 入参：按 id 查询。
+message GetUserRequest {
+  int64 id = 1;
+}
+
+// CreateUser 入参：服务端补 id 后原样回显。
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+}
+
+// 服务定义：provider 用 generated UserServiceGrpc.UserServiceImplBase 实现；
+// consumer 用 UserServiceGrpc.newBlockingStub(channel) 调用。
+service UserService {
+  // 按 id 查用户。
+  rpc GetUser(GetUserRequest) returns (User);
+  // 创建用户。
+  rpc CreateUser(CreateUserRequest) returns (User);
+}

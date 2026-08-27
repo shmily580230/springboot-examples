@@ -1,0 +1,4 @@
+POST http://localhost:8093/grpc/users
+
+###
+GET http://localhost:8093/grpc/users/1

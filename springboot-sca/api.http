@@ -1,0 +1,4 @@
+POST http://localhost:8092/sca/users
+
+###
+GET http://localhost:8092/sca/users/1
